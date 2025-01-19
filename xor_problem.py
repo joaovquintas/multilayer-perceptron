@@ -2,17 +2,18 @@ import numpy as np
 
 def sigmoid(x):
     return 1/ (1 + np.exp(-x))
+
 def sig_derivative(sigmoid):
     return sigmoid * (1 - sigmoid)
 
 ### Cost function - Binary Cross-Entropy Loss
-def binary_cross_entropy(y_true, y_predict):
+def bc_entropy(y_true, y_predict):
     epsilon = 1e-15
-    y_predict = np.clip(y_predict, epsilon, 1 - epsilon)  # Restringe valores para evitar erros
+    y_predict = np.clip(y_predict, epsilon, 1 - epsilon)
     bce = -np.mean(y_true * np.log(y_predict) + (1 - y_true) * np.log(1 - y_predict))
     return bce
 
-def binary_cross_entropy_derivative(y_true, y_predict):
+def bc_derivative(y_true, y_predict):
     epsilon = 1e-15
     y_predict = np.clip(y_predict, epsilon, 1 - epsilon)
     return -(y_true / y_predict) + (1 - y_true) / (1 - y_predict)
@@ -40,9 +41,9 @@ W2 = np.random.random((hidden_layer_dim, 1))
 b2 = np.random.random((1, output_layer_dim))
 
 
-## Trainning
-epochs = 30000
-learning_rate = 0.1
+# Trainning
+epochs = 10000
+learning_rate = 0.166
 
 for epoch in range(epochs):
 
@@ -53,14 +54,14 @@ for epoch in range(epochs):
     Z2 = np.dot(A1, W2) + b2
     A2 = sigmoid(Z2)
 
-    loss = binary_cross_entropy(Y, A2)
+    loss = bc_entropy(Y, A2)
     if epoch % 1000 == 0:
         print(f"Epoch: {epoch}, Loss: {loss:.4f}")
 
-    #BACKPROPAGATION 
+    #BACKPROPAGATION w
 
     ## OUTPUT GRADIENT
-    error_output = binary_cross_entropy_derivative(Y, A2)
+    error_output = bc_derivative(Y, A2)
     delta_error_output = error_output * sig_derivative(A2)
 
 
@@ -70,11 +71,9 @@ for epoch in range(epochs):
     delta_error_hidden = error_hidden * sig_derivative(A1)
 
     ## GRADIENT DESCENT
-
     W2 -= np.dot(A1.T, delta_error_output) * learning_rate
     b2 -= np.sum(delta_error_output, keepdims=True, axis=0)
     W1 -= np.dot(X.T, delta_error_hidden) *learning_rate
     b1 -= np.sum(delta_error_hidden, keepdims=True, axis=0)
 
 print(A2)
-
